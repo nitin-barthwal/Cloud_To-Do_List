@@ -1,0 +1,388 @@
+
+
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.5.8/firebase.js"></script>
+  <script src="index.js"></script>
+  <link rel="stylesheet" href="main2.css"></link>
+
+  <script>
+
+    function logoutCall()
+    {
+      localStorage.setItem("userEmail","");
+      logout();
+      window.location.replace("index.html");
+    };
+
+    var userEmail = localStorage.getItem("userEmail");
+    if(userEmail == null || userEmail == '')
+    {
+      logoutCall();
+    }
+
+    var userdatabase = firebase.database().ref('/users/' + userEmail + "/todolist/");
+    var listNameArray = [];
+
+    userdatabase.on('value',function(snapshot) {
+      var jsonobj = JSON.parse(JSON.stringify(snapshot.val()))
+      document.getElementById('userDataDiv').innerHTML="";
+      listNameArray = [];
+      if(jsonobj!=null){
+        initializeUI(jsonobj);
+      }
+    });
+
+    function deleteListClick(listName)
+    {
+      var r = confirm("Delete the list \""+listnameValue+"\" ?");
+      if (r == true) {
+        userdatabase.child(listName).remove();
+      } 
+    }
+
+    function deleteTaskClick(listName, taskid)
+    {
+      var r = confirm("Delete this task ?");
+      if (r == true) {
+        userdatabase.child(listName).child(taskid).remove();
+      } 
+    }
+
+    function appendShareandAddTaskButton(parentdiv, listnameValue)
+    {
+      var currentDate = new Date();
+      var currentTime = currentDate.getTime();
+      var taskButton = document.createElement("Button");
+      taskButton.id="task"+currentTime;
+      var textForButtonTask = document.createTextNode("Add New Task");
+      taskButton.appendChild(textForButtonTask)
+
+    //Add a button for Sharing a New List 
+    var shareListButton = document.createElement("Button");
+    shareListButton.innerHTML = "Share"
+
+    shareListButton.onclick = function() {
+      var shareEmail = prompt("Please enter email id to Share");
+      if (shareEmail != null) {
+        shareEmail= shareEmail.trim();
+
+        shareEmailFormatted = getFormattedEmail(shareEmail)
+        firebase.database().ref('/users/' + userEmail + '/todolist/'+listnameValue).once('value').then(function(snapshot) {
+          firebase.database().ref('/users/' + shareEmailFormatted + "/todolist/")
+          .child("Shared "+listnameValue).set(snapshot.val());
+        });
+
+        subject = "Sharing To Do List"
+        body = "Sharing To Do List.\n Please login to acount to view link:"+window.location.href;
+        window.open("https://mail.google.com/mail/?view=cm&fs=1&tf=1&to="+shareEmail+"&subject="+subject+"&body="+body  )
+            //window.open('mailto:shareEmail?subject=subject&body=body');
+          }
+        };
+
+    //Add a button for DELETING a  List 
+    var deleteListButton = document.createElement("Button");
+    deleteListButton.innerHTML = "Delete"
+    deleteListButton.onclick = function(){deleteListClick(listnameValue);}
+    taskButton.onclick = function() {
+     if(listnameValue==''){
+      alert('Enter List name');
+    }
+    else{
+      addTaskClick(parentdiv, listnameValue, null, null, null)
+    }
+  };
+  parentdiv.appendChild(taskButton);
+  parentdiv.appendChild(shareListButton);
+  parentdiv.appendChild(deleteListButton);
+}
+
+function initializeUI(jsonobj)
+{
+  for (var listkey in jsonobj) {
+    if (jsonobj.hasOwnProperty(listkey) && jsonobj[listkey]!=null) {
+      listNameArray.push(listkey)
+      var currentDate = new Date();
+      var currentTime = currentDate.getTime();
+      var listdiv = document.createElement('div');
+      listdiv.id = "divi"+currentTime;
+      listdiv.className  ="todolistdiv"
+      listnameValue=listkey;
+      var listNameLabel= document.createElement("p");
+      listNameLabel.className  ="listnamestyle" 
+
+      listNameLabel.id = "p_list_name"+currentTime;
+         //var listLabel = document.createTextNode('LIST NAME'+ nbsp+'::  '  );
+        //listLabel.id="listLabel "+currentTime;
+        listNameLabel.innerHTML='LIST NAME&nbsp;&nbsp;::&nbsp;&nbsp;' ;
+        
+        var listLabelValue = document.createTextNode(listnameValue);
+        listNameLabel.appendChild(listLabelValue);
+        listdiv.appendChild(listNameLabel);
+        listdiv.appendChild(document .createElement("br"));
+        appendShareandAddTaskButton(listdiv, listkey)
+        for (var taskkey in jsonobj[listkey]) {
+          if(taskkey!= 'createdDate' && taskkey!='name')
+          {
+            addTaskDiv(
+              listnameValue,
+              taskkey,
+              listdiv, 
+              jsonobj[listkey][taskkey].taskname, 
+              jsonobj[listkey][taskkey].description);
+          }
+        }
+        document.getElementById('userDataDiv').appendChild(listdiv);
+      }
+    }
+  }
+</script>
+<script type="text/javascript">
+  function editTask(listnameValue, taskid, taskContainer, taskName, taskDescription)
+  {
+    taskContainer.innerHTML = "";
+    addTaskClick(taskContainer, listnameValue, taskid, taskName, taskDescription)
+  }
+
+
+  function addTaskDiv(listnameValue, taskid, parentdiv, taskName, taskDescription)
+  {
+    var taskContainer=document.createElement('div');
+    taskContainer.className  ="listnamestyle" 
+    var containerTaskDesc=document.createElement('p');
+    var nameTaskLabel = document.createTextNode('Task Name :: ');
+    var nameTask = document.createTextNode(taskName);
+    containerTaskDesc.appendChild(nameTaskLabel);
+    containerTaskDesc.appendChild(nameTask);
+    containerTaskDesc.appendChild(document .createElement("br"));
+    containerTaskDesc.appendChild(document .createElement("br"));
+   containerTaskDesc.style.wordWrap="break-word";
+    var descriptionLabel = document.createTextNode('Description ::');
+    var descriptionValue=document.createElement('p');
+    descriptionValue.innerHTML = taskDescription;
+    descriptionValue.style.wordWrap="break-word";
+    //var descriptionValue= document.createTextNode(taskDescription);
+
+    containerTaskDesc.appendChild(descriptionLabel);
+    
+    containerTaskDesc.appendChild(descriptionValue);
+    
+    containerTaskDesc.appendChild(document .createElement("br"));
+
+    var buttonEdit = document.createElement("Button");
+    buttonEdit.innerHTML='Edit'
+    buttonEdit.onclick = function(){
+      editTask(listnameValue, taskid, taskContainer, taskName, taskDescription)
+    };
+    var buttonDelete = document.createElement("Button");
+    buttonDelete.innerHTML='Delete'
+    buttonDelete.onclick = function(){
+      deleteTaskClick(listnameValue, taskid); 
+    };
+
+
+    taskContainer.appendChild(containerTaskDesc);
+    taskContainer.appendChild(buttonEdit);
+    taskContainer.appendChild(buttonDelete);
+    parentdiv.appendChild(taskContainer);
+  }
+  function createList(){
+    var currentDate = new Date();
+    var currentTime = currentDate.getTime();
+
+    var divElement = document.createElement('div');
+    divElement.id = "div"+currentTime;
+    divElement.className  ="todolistdiv"
+    var divCreatelistElement = document.createElement('div');
+
+    var iptNode = document.createElement("input");
+    iptNode.setAttribute("type", "text");
+    iptNode.id="list"+currentTime;
+
+
+
+    var listnamenode=document.createTextNode('Enter List Name');
+
+    //Add a button for ceating a New List 
+    var createListButton = document.createElement("Button");
+    createListButton.innerHTML = "Create List" 
+    createListButton.id="createlist"+currentTime;
+
+    var listnameValue ="new";
+    createListButton.onclick=function(){
+      listnameValue=iptNode.value.trim();
+      if(listNameArray.indexOf(listnameValue) > -1)
+      {
+       alert("List already exists.\nPlease choose another name") 
+     }
+     else
+     {
+      // Server Call
+      addlistDB(listnameValue);
+    }
+  }
+
+  divCreatelistElement.appendChild(listnamenode);
+  divCreatelistElement.appendChild(iptNode);
+  divCreatelistElement.appendChild(createListButton );
+  divElement.appendChild(divCreatelistElement)
+  document.getElementById('userDataDiv').appendChild(divElement)
+}
+
+function addTaskClick(parentdiv, listnameValue, taskid, taskName, taskDescription){
+  var divElementTask = document.createElement('p');
+  divElementTask.className = "listnamestyle";
+  var currentDate = new Date();
+  var currentTime = currentDate.getTime();
+
+
+  divElementTask.id = "paraID"+currentTime;
+
+  var node=document.createTextNode('Enter Task Name');
+
+
+  var iptNode = document.createElement("input");
+  iptNode.setAttribute("type", "text");
+  iptNode.style['width'] = '100% ';
+  iptNode.style['height'] = '100px ';
+
+  var iptNode1 = document.createElement("TEXTAREA");
+  iptNode1.setAttribute("type", "text");
+  iptNode1.style['width'] = '100% ';
+  iptNode1.style['height'] = '100px ';
+  var nodeDesc=document.createTextNode('  Enter Description');
+
+    //if editing task
+    if(taskid!=null)
+    {
+      iptNode.value = taskName;
+      iptNode1.value = taskDescription;
+    }
+
+    var addTaskButton = document.createElement("Button");
+    addTaskButton.id="addtask"+currentTime;
+    addTaskButton.innerHTML = "Submit"
+    addTaskButton.onclick = function() {
+      if(iptNode.value=="")
+      {
+
+       alert('Enter Task name');
+     }
+     else
+      if(iptNode1.value=="")  
+      {
+
+       alert('Enter Description');
+     }
+
+     else{  
+      var newtaskId = addUpdatetaskDB(taskid, listnameValue,iptNode1.value,iptNode.value)
+      divElementTask.style.display="none";
+    }
+  }
+
+  divElementTask.appendChild(node);
+  divElementTask.appendChild(iptNode);
+  divElementTask.appendChild(document .createElement("br"));
+
+  divElementTask.appendChild(nodeDesc);
+  divElementTask.appendChild(iptNode1);
+  divElementTask.appendChild(document .createElement("br"));
+
+  divElementTask.appendChild(addTaskButton);
+
+  parentdiv.appendChild(divElementTask);
+}
+
+function addToDB(){
+  var database=firebase.database();
+  currentDate = new Date();
+  currentTime = currentDate.getTime();
+  userid = 'user_'+currentTime;
+  var userobject =   firebase.database().ref('users/' + "username");
+}
+
+function addlistDB(listname)
+{
+  var database=firebase.database();
+  currentDate = new Date();
+  currentTime = currentDate.getTime();
+  userid = 'user_'+currentTime;
+  var userobject =   firebase.database().ref('users/' + userEmail);
+  userobject.child('todolist').child(listname).set({name:listname,createdDate: currentTime});
+}
+
+function addUpdatetaskDB(existingTaskid, listname,desc,tasknametext)
+{
+  var database=firebase.database();
+  currentDate = new Date();
+  currentTime = currentDate.getTime();
+  userid = 'user_'+currentTime;
+  var userobject =   firebase.database().ref('users/' + userEmail);
+
+  var newtaskID;
+    //Check if updating or new task
+    if(existingTaskid == null)
+    {
+        //new task code
+        var taskref = userobject.child('todolist').child(listname).push(
+        {
+          taskname : tasknametext,
+          description : desc,
+          createdDate : " "+currentDate
+        });
+        newtaskID = taskref.key;
+      }
+      else
+      {
+      //Updae code
+      var taskref = userobject.child('todolist').child(listname).child(existingTaskid).set(
+      {
+        taskname : tasknametext,
+        description : desc,
+        createdDate : " "+currentDate
+      });
+      newtaskID = existingTaskid;
+    }
+    //document.getElementById("task_div").style.display = "none"
+    return newtaskID;
+  }
+
+
+
+function displayWelcomMessage()
+{ 
+    var user_email_id = localStorage.getItem("user_email_id");
+    if(user_email_id != null && user_email_id != '')
+    {
+      welcomeMessage = "Welcome " + user_email_id.split('@')[0];
+      document.getElementById('welcome_message').innerHTML = welcomeMessage;
+    }
+}
+
+</script>
+</head>
+<style>
+body
+{
+ background-color:#FFCBA4
+}
+
+</style>
+
+
+<body onload=displayWelcomMessage()>
+  <h1 align="center" id="welcome_message">Welcome</h1>
+  <h2 align="center"> To-Do List</h2>
+  <p>
+    <button id="addlist" onclick="createList()" >Add New List</button>
+    <button  onclick="logoutCall()" class="p"> Logout </button> 
+  </p>
+  <div id="userDataDiv"></div>
+  <br/>
+</body>
+</html>

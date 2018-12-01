@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="main2.css">
+  <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.5.7/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.5.7/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.5.8/firebase.js"></script>
+<script src="index.js"></script>
+
+</head>
+<style>
+    body {
+          background-color: #D3D3D3;  
+      }
+
+      
+ </style>         
+<body>
+  <div id="homepage">
+  <p align="center" >
+  <marquee
+     direction="right"
+     loop="10"
+     scrollamount="3"
+     scrolldelay="0"
+     behavior="alternate"
+     width="40%"
+     bgcolor="#9999ff"
+     
+     
+     >
+
+    <h1  id = "to-do-style" ><b>TO-DO LIST</b></h1>
+  </marquee> 
+  </p> 
+
+
+    <div class="imgcontainer">
+      <img src="Picture1.png" width="150px">
+    </div>
+
+    <div id = "login_div" class="container" align="center">
+      <label for="uname"><b>Email</b></label>
+      <input type="text" placeholder="Enter Email" id="email" name="uname" required>
+      <p  >
+         <label for="psw"><b>Password</b></label>
+        
+         <input type="password"  placeholder="Enter Password" id= "pswd" name="psw" required>
+       </p>
+      <br/>
+      <p align="center">
+      <button onclick="create_user()" > Create / Login User </button>
+      </p>
+      </div>
+
+    <div id = "user_div" class="container1" style="display: none;">
+      <p id = "user_para">Welcome user</p>
+
+<a id="startref" href="TodoList.html"></a>
+      <!-- <button onclick="enter()"  > Enter wesite </button>
+
+      <button  onclick="logout()"> Logout </button> -->
+    </div>
+<script type="text/javascript">
+  function enter()
+{
+    var userEmail=document.getElementById("email").value;
+    userEmail = getFormattedEmail(userEmail)
+    localStorage.setItem("userEmail", userEmail);
+    document.getElementById("startref").click();
+}
+</script>
+</div>
+</body>
+</html>
