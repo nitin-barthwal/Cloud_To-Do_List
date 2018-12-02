@@ -39,7 +39,7 @@
 
     function deleteListClick(listName)
     {
-      var r = confirm("Delete the list \""+listnameValue+"\" ?");
+      var r = confirm("Delete the list \""+listName+"\" ?");
       if (r == true) {
         userdatabase.child(listName).remove();
       } 
@@ -200,6 +200,10 @@ function initializeUI(jsonobj)
     var divCreatelistElement = document.createElement('div');
 
     var iptNode = document.createElement("input");
+
+    iptNode.style['width'] = '100% ';
+    iptNode.style['height'] = '50px ';
+  
     iptNode.setAttribute("type", "text");
     iptNode.id="list"+currentTime;
 
@@ -225,9 +229,11 @@ function initializeUI(jsonobj)
       addlistDB(listnameValue);
     }
   }
-
+  
   divCreatelistElement.appendChild(listnamenode);
+
   divCreatelistElement.appendChild(iptNode);
+  divCreatelistElement.appendChild(document .createElement("br"));
   divCreatelistElement.appendChild(createListButton );
   divElement.appendChild(divCreatelistElement)
   document.getElementById('userDataDiv').appendChild(divElement)
@@ -378,10 +384,10 @@ body
 <body onload=displayWelcomMessage()>
   <h1 align="center" id="welcome_message">Welcome</h1>
   <h2 align="center"> To-Do List</h2>
-  <p>
+  <div>
     <button id="addlist" onclick="createList()" >Add New List</button>
     <button  onclick="logoutCall()" class="p"> Logout </button> 
-  </p>
+  </div>
   <div id="userDataDiv"></div>
   <br/>
 </body>
