@@ -375,15 +375,28 @@ function displayWelcomMessage()
 <style>
 body
 {
- background-color:#FFCBA4
+ 
+ background-image: url("black.jpg");
+ 
+ background-repeat:repeat;
+
+
+
 }
 
+
+</style>
+<style type="text/css">
+  h1{
+font-size: "60";
+
+  }
 </style>
 
 
 <body onload=displayWelcomMessage()>
-  <h1 align="center" id="welcome_message">Welcome</h1>
-  <h2 align="center"> To-Do List</h2>
+  <h1 align="center" id="welcome_message"><b>Welcome</b></h1>
+  
   <div>
     <button id="addlist" onclick="createList()" >Add New List</button>
     <button  onclick="logoutCall()" class="p"> Logout </button> 
