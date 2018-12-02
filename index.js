@@ -2,12 +2,14 @@
   // Initialize Firebase
   // Initialize Firebase
   var config = {
-   apiKey: "AIzaSyAvbtT8F5oyRGyXz7jL9ZuhCbQvbNX_cUA",
-   authDomain:  "mytrello-8d0e2.firebaseapp.com",
-   databaseURL: "https://mytrello-8d0e2.firebaseio.com",
-   projectId:   "mytrello-8d0e2",
-   storageBucket: "mytrello-8d0e2.appspot.com",
-   messagingSenderId: "243557495203"
+
+
+  apiKey: "AIzaSyAvbtT8F5oyRGyXz7jL9ZuhCbQvbNX_cUA",
+  authDomain:  "mytrello-8d0e2.firebaseapp.com",
+  databaseURL: "https://mytrello-8d0e2.firebaseio.com",
+  projectId:   "mytrello-8d0e2",
+  storageBucket: "mytrello-8d0e2.appspot.com",
+  messagingSenderId: "243557495203"
  };
  firebase.initializeApp(config);
 
